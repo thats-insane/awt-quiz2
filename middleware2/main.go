@@ -19,7 +19,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "hi im cahlil")
 }
 
-func aboutHander(w http.ResponseWriter, r *http.Request) {
+func aboutHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "i study information technology")
 }
 
