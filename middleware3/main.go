@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func securityHeadersMiddleware(next http.Handler) http.Handler {
+func securityHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-XSS-Protection", "1; mode=block")
 		w.Header().Set("X-Frame-Options", "deny")
@@ -15,15 +15,7 @@ func securityHeadersMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func logRequestMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		next.ServeHTTP(w, r)
-		slog.Info("Request logged", "remoteAddr", r.RemoteAddr, "duration", time.Since(start))
-	})
-}
-
-func recoverPanicMiddleware(next http.Handler) http.Handler {
+func recoverPanic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
@@ -35,13 +27,14 @@ func recoverPanicMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func logRequest(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func logRequest(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
 		slog.Info("start", "method", r.Method, "path", r.URL.Path)
-		defer slog.Info("end", "method", r.Method, "path", r.URL.Path)
+		defer slog.Info("end", "method", r.Method, "path", r.URL.Path, "remoteAddr", r.RemoteAddr, "duration", time.Since(start))
 
-		next(w, r)
-	}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -50,9 +43,9 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/home", logRequest(homeHandler))
+	mux.HandleFunc("/home", homeHandler)
 
-	handler := securityHeadersMiddleware(recoverPanicMiddleware(logRequestMiddleware(mux)))
+	handler := securityHeaders(recoverPanic(logRequest(mux)))
 
 	http.ListenAndServe(":3000", handler)
 }
