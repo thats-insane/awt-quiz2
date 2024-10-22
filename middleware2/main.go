@@ -25,7 +25,7 @@ func aboutHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/home", logRequest(homeHandler))
-	http.HandleFunc("/about", logRequest(aboutHander))
+	http.HandleFunc("/about", logRequest(aboutHandler))
 
 	http.ListenAndServe(":3000", nil)
 }
