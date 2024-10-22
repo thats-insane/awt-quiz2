@@ -16,16 +16,11 @@ func logRequest(next func(http.ResponseWriter, *http.Request)) func(http.Respons
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "hi im cahlil")
-}
-
-func aboutHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "i study information technology")
+	fmt.Fprintln(w, "hi im cahlil and i study information technology")
 }
 
 func main() {
 	http.HandleFunc("/home", logRequest(homeHandler))
-	http.HandleFunc("/about", logRequest(aboutHandler))
 
 	http.ListenAndServe(":3000", nil)
 }

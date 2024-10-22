@@ -19,7 +19,7 @@ func logRequestMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		next.ServeHTTP(w, r)
-		slog.Info("Request logged", "remoteAddr", r.RemoteAddr, "method", r.Method, "url", r.URL.RequestURI(), "duration", time.Since(start))
+		slog.Info("Request logged", "remoteAddr", r.RemoteAddr, "duration", time.Since(start))
 	})
 }
 
@@ -45,17 +45,12 @@ func logRequest(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "hi im cahlil")
-}
-
-func aboutHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "i study information technology")
+	fmt.Fprintln(w, "hi im cahlil and i study information technology")
 }
 
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/home", logRequest(homeHandler))
-	mux.HandleFunc("/about", logRequest(aboutHandler))
 
 	handler := securityHeadersMiddleware(recoverPanicMiddleware(logRequestMiddleware(mux)))
 
